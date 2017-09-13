@@ -2,7 +2,6 @@
 // Adapted From WinterMute's fatlibtest
 
 #include <nds.h>
-#include <nds/arm9/console.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,8 +9,7 @@
 
 #include <sys/stat.h>
 #include <sys/dir.h>
-
-// #include "fat/gba_nds_fat.h"
+#include <dirent.h>
 
 char fileName[256];
 int numFiles = 0;
@@ -126,20 +124,24 @@ void getFileList() {
 //---------------------------------------------------------------------------------
 	iprintf("\x1b[6;0H\x1b[0J");
 	freeFileList();
-	
-	int type;
-	struct stat st;
-	
-	while ( dirnext(dir, fileName, &st) == 0 ) {
-		if(st.st_mode & S_IFDIR)
-			type = FT_DIR;
-		else
-			type = FT_FILE;
-		
-		addFile( type, fileName );
+
+	DIR *pdir;
+	struct dirent *pent;
+
+	pdir=opendir(".");
+
+		if (pdir){
+
+			while ((pent=readdir(pdir))!=NULL) {
+
+				if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
+					continue;
+
+				addFile(pent->d_type, pent->d_name);
+
+			}
+			closedir(pdir);
 	}
-	
-	dirclose(dir);
 }
 
 char *cursorPos = "\x1b[0;0H  ";
@@ -199,7 +201,6 @@ void updateCursor() {
 FILE* loadFile() {
   int keysPressed, keysReleased, keysDownNonRepeat;
   iprintf("\x1b[4;10HLoad File");
-  dir = diropen(".");
   getFileList();
   showFileList();
   // iprintf("numFiles: %d\n",numFiles);	
@@ -218,7 +219,6 @@ FILE* loadFile() {
 		
 		if ( keysPressed & KEY_B ) {
 			chdir("..");
-			dir = diropen(".");
 			getFileList();
 			showFileList();
 			cursorLine=6;
@@ -238,7 +238,6 @@ FILE* loadFile() {
 			
 			if ( file->type == FT_DIR ) {
 				chdir(file->name);
-				dir = diropen(".");
 				getFileList();
 				showFileList();
 				cursorLine=6;
