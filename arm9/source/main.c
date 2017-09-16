@@ -5,8 +5,6 @@
 #define DESIRED_FPS 60
 
 #include <nds.h>
-#include <nds/bios.h>
-#include <nds/arm9/console.h>
 #include <stdio.h>
 #include <sys/unistd.h>
 #include <string.h>
@@ -17,14 +15,10 @@
 #include "file.h"
 #include "fat.h"
 
-#include "m3sd.h"
-
 #ifdef USE_ZLIB
 #include "zlib.h"
 #endif
 
-// #include "fat/gba_nds_fat.h"
-// #include "fat/disc_io.h"
 
 #ifdef ARM9_SOUND
 TransferSoundData picosound;
@@ -82,8 +76,8 @@ void bgupdate()
 	s16 c = COS[0] >> 4;
 	BG3_XDX = ( c * (xdxval))>>8;
 	BG3_YDY = ( c * (ydyval))>>8;
-	iprintf("\x1b[16;0Hxdxval: %d    \n",xdxval);
-	iprintf("ydyval: %d    ",ydyval);
+	iprintf("\x1b[16;0Hxdxval: %ld    \n",xdxval);
+	iprintf("ydyval: %ld    ",ydyval);
 }
 
 void PrintRegion()
@@ -830,43 +824,11 @@ void on_irq()
 	}
 }
 
-/*
-void LidHandler() {
-		if(IPC->buttons ==  0x00FF) {
-			swiChangeSoundBias(0,0x400);
-			powerOFF(POWER_ALL);
-			// REG_IE=IRQ_PM;
-		}
-		else {
-			swiChangeSoundBias(1,0x400);
-			powerON(POWER_ALL);
-		}
-}
-*/
 
 void InitInterruptHandler()
 {
-	irqInit();
 	irqEnable(IRQ_VBLANK);
 	irqSet(IRQ_VBLANK, processvblank);
-	// irqSet(IRQ_LID, LidHandler);
-	// irqEnable(IRQ_LID);
-	// Setup a 100Hz = 10ms timer
-	/*
-	TIMER0_DATA = TIMER_FREQ_1024(100);
-	TIMER0_CR = TIMER_ENABLE | TIMER_DIV_1024 | TIMER_IRQ_REQ;
-
-	irqEnable(IRQ_TIMER0);
-	irqSet(IRQ_TIMER0, processtimer);
-	*/
-
-	/*REG_IME = 0;
-	IRQ_HANDLER = on_irq;
-	REG_IE = IRQ_VBLANK | IRQ_TIMER0;
-	REG_IF = ~0;
-	DISP_SR = DISP_VBLANK_IRQ;
-	REG_IME = 1;
-	*/
 }
 
 
@@ -1120,10 +1082,10 @@ void FindAppendedRom(void)
 int main(void)
 {
 	// ClearMemory();
-	resetMemory2_ARM9();
-	powerON(POWER_ALL);
+//	resetMemory2_ARM9();
+//	powerON(POWER_ALL);
 
-	struct mallinfo mi;
+//	struct mallinfo mi;
 	
 	// videoSetMode(MODE_FB0);
 	// vramSetBankA(VRAM_A_LCD);
